@@ -10,7 +10,8 @@ import numpy as np
 import dicom
 import skimage
 from skimage import io
-from PIL import Image,ImageChops, ImageEnhance
+from PIL import Image, ImageChops, ImageEnhance
+
 
 # Define a function which takes an image, lets the user choose ROI and displays mean
 def MeanROI(image):
@@ -20,7 +21,7 @@ def MeanROI(image):
     pl.title('Select ROI from foreground')
 
     # let user draw first ROI
-    ROI1 = roipoly(roicolor='r') #let user draw first ROI
+    ROI1 = roipoly(roicolor='r')  # let user draw first ROI
 
     # show the image with the first ROI
     pl.imshow(image, interpolation='nearest', cmap="gray")
@@ -34,9 +35,10 @@ def MeanROI(image):
     [x.displayMean(image) for x in [ROI1, ROI2]]
     pl.title('The two ROIs')
     pl.show()
-    meanFG,meanBG = [x.displayMean(image) for x in [ROI1, ROI2]]
+    meanFG, meanBG = [x.displayMean(image) for x in [ROI1, ROI2]]
     pl.close()
     return meanFG, meanBG
+
 
 """def histEq(im,nbr_bins=256):
 
@@ -50,44 +52,55 @@ def MeanROI(image):
 """
 # Calculate the class means for 5 images of Spine
 spineImage_1 = Image.open('/Users/Akshita/Documents/MATLAB/JPG_IMAGES/image_24.jpg')
-FG_1,BG_1 = MeanROI(spineImage_1)
+FG_1, BG_1 = MeanROI(spineImage_1)
 spineImage_2 = Image.open('/Users/Akshita/Documents/MATLAB/JPG_IMAGES/image_5.jpg')
-FG_2,BG_2 = MeanROI(spineImage_2)
+FG_2, BG_2 = MeanROI(spineImage_2)
 spineImage_3 = Image.open('/Users/Akshita/Documents/MATLAB/JPG_IMAGES/image_10.jpg')
-FG_3,BG_3 = MeanROI(spineImage_3)
+FG_3, BG_3 = MeanROI(spineImage_3)
 spineImage_4 = Image.open('/Users/Akshita/Documents/MATLAB/JPG_IMAGES/image_18.jpg')
-FG_4,BG_4 = MeanROI(spineImage_4)
+FG_4, BG_4 = MeanROI(spineImage_4)
 spineImage_5 = Image.open('/Users/Akshita/Documents/MATLAB/JPG_IMAGES/image_21.jpg')
-FG_5,BG_5 = MeanROI(spineImage_5)
+FG_5, BG_5 = MeanROI(spineImage_5)
 mean_FG = (FG_1 + FG_2 + FG_3 + FG_4 + FG_5) / 5
 mean_BG = (BG_1 + BG_2 + BG_3 + BG_4 + BG_5) / 5
-print ('The mean of x1:{0}, x2:{1}, x3:{2}, x4:{3}, x5:{4}'.format(FG_1,FG_2,FG_3,FG_4,FG_5))
-print ('The mean of y1:{0}, y2:{1}, y3:{2}, y4:{3}, y5:{4}'.format(BG_1,BG_2,BG_3,BG_4,BG_5))
+print('The mean of x1:{0}, x2:{1}, x3:{2}, x4:{3}, x5:{4}'.format(FG_1, FG_2, FG_3, FG_4, FG_5))
+print('The mean of y1:{0}, y2:{1}, y3:{2}, y4:{3}, y5:{4}'.format(BG_1, BG_2, BG_3, BG_4, BG_5))
 print("mean of foreground:{0}".format(mean_FG))
 print("mean of background:{0}".format(mean_BG))
-
 
 np.set_printoptions(precision=5, threshold=np.inf)
 img = skimage.io.imread('/Users/Akshita/Documents/MATLAB/JPG_IMAGES/image_24.jpg')
 img = np.matrix(img)
-i=0
-j=0
-labels =[]
-centerPix =[]
-for i in range(0,511,3):
-    for j in range(0,511,3):
-        a = img[i:i+3,j:j+3]
-        center = a[1,1]
+i = 0
+j = 0
+labels = []
+centerPix = []
+for i in range(0, 511, 3):
+    for j in range(0, 511, 3):
+        a = img[i:i + 3, j:j + 3]
+        center = a[1, 1]
         diff_FG = abs(center - mean_FG)
         diff_BG = abs(center - mean_BG)
         centerPix.append(center)
-        if (diff_FG < (diff_BG-40)):
+        if (diff_FG < (diff_BG - 40)):
             labels.append(1)
         else:
             labels.append(0)
+# print(labels)
+# print(centerPix)
+def genProbability(samples):
+    meanofSamples = np.mean(samples)
+    varofSamples = np.var(samples)
+    return meanofSamples, varofSamples
 
-print((labels==1).sum)
-#print(centerPix)
+def normPDF(num, mean, sd):
+    var = float(sd)**2
+    pi = 3.1415926
+    denom = (2*pi*var)**.5
+    num = math.exp(-(float(x)-float(mean))**2/(2*var))
+    return num/denom
+
+
 """img_gray = rgb2gray(img)
 plt.imshow(img_gray, cmap ='gray')
 print(img_gray.shape)
@@ -101,4 +114,3 @@ diff = ImageChops.add(diff, diff, 2.00, -100)
 bbox = diff.getbbox()
 im = im.crop(bbox)
 im.show()"""
-
