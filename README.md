@@ -11,4 +11,5 @@ STEP 3: Design a classifier:
       
 STEP 4: Testing:
       
-      Slide a window across the image; input the patch to the classifier; observe the assigned label and segment it by giving       it color.
+      Slide a window across the image; input the patch to the classifier; observe the assigned label and segment it by giving
+      it color.
