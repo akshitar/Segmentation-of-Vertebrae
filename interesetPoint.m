@@ -38,35 +38,13 @@ disp('Calling ip_fop ...');
 
 % Output:
 disp('Results:');
-% a) integer positions of window centers
-%     disp('Positions of window centers (actually were integers in the internally scaled image):');
-%     for i=1:length(win)
-%         fprintf('%5.1f   %5.1f\n',win(i).r,win(i).c);
-%     end
-
-% b) subpixel positions of corners with covariance matrix
-disp('Subpixel positions of corners with covariance matrix');
-for i=1:length(corner)
-r=corner(i).r
-c=corner(i).c
-cov=corner(i).cov
+%a) integer positions of window centers
+disp('Positions of window centers (actually were integers in the internally scaled image):');
+for i=1:length(win)
+fprintf('%5.1f   %5.1f\n',win(i).r,win(i).c);
 end
 
-% c) subpixel positions of circular points with covariance matrix
-disp('Subpixel positions of circular points with covariance matrix:');
-for i=1:length(circ)
-r=circ(i).r
-c=circ(i).c
-cov=circ(i).cov
-end
-
-% d) window centers of points with could not be classified unambiguously
-disp('Window centers of points with could not be classified unambiguously:');
-for i=1:length(noclass)
-r=noclass(i).r
-c=noclass(i).c
-end
-%% Reduce the number of interest points
+%% Reducing the number of interest points
 winMatrix = [];
 winMatrix(1,:) = [win.r];
 winMatrix(2,:) = [win.c];
@@ -80,17 +58,17 @@ extra = [];
 extra(1,:) = dummy(i+1:size(dummy,1),1) - dummy(i,1);
 extra(2,:) = dummy(i+1:size(dummy,1),2) - dummy(i,2);
 extra = extra';
-redCond = (abs(extra(:,1))<10) & (abs(extra(:,2))<10);
+redCond = (abs(extra(:,1))<8) & (abs(extra(:,2))<8);
 dummy(redCond,:) = [];
 end
 end
-winMatrix = dummy
+win = dummy;
 %% STEP 2:
 
 % Take image patches around the interest points and store them in a
 % cell array
 % Calculate the number of interest points that have been detected
-interestPoints = size(win,2);
+interestPoints = size(win,1);
 % Decide the size of patches
 windowSize = 37;
 halfLength = (windowSize-1)/2;
@@ -99,8 +77,8 @@ window = zeros(windowSize, windowSize);
 extendedImage = padarray(image,[halfLength,halfLength],'both');
 % For each location of the interest point, take the window centered at it
 for numberOfPoints = 1:interestPoints
-x = floor(win(numberOfPoints).r);
-y = floor(win(numberOfPoints).c);
+x = floor(win(numberOfPoints,1));
+y = floor(win(numberOfPoints,2));
 for i = 1:windowSize
 for j = 1:windowSize
 window(i,j) = extendedImage(x+i-1, y+j-1);
@@ -109,5 +87,6 @@ end
 patches{k} = window;
 k = k + 1;
 end
-end
-% Can use the command 'imshow(mat2gray(patches{k}))' to view the patch
+
+%figure,imshow(mat2gray(patches{k}));
+% without reducing the number of interest points we get 3000 patches for each image 
