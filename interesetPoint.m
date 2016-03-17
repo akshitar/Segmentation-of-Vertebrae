@@ -1,5 +1,6 @@
 close all, clear all, clc;
-
+patchMatrix = [];
+boundaryArr = [];
 %% STEP 1:
 
 allImages = dir('*.png');  % the folder in which ur images exists
@@ -16,7 +17,7 @@ if (dimensions(3) == 3)
 image = rgb2gray(image);
 end
 %figure, imshow(image);
-end
+
 % Call with default parameters
 % [win, corner, circ, noclass] = ip_fop(g);
 
@@ -33,42 +34,74 @@ disp('Calling ip_fop ...');
                                     'PRECISION_THRESHOLD'      ,0.5,         ... threshold for precision of points (default: 0.5 Pixel)
                                     'ROUNDNESS_THRESHOLD'      ,0.3,         ... threshold for roundness (default: 0.3)
                                     'SIGNIFICANCE_LEVEL'       ,0.999,       ... significance level for point classification (default: 0.999)
-                                    'VISUALIZATION'            ,'on');       ... visualization on or off (default : 'off')
+                                    'VISUALIZATION'            ,'off');       ... visualization on or off (default : 'off')
 
 
 % Output:
 disp('Results:');
-%a) integer positions of window centers
+% a) integer positions of window centers
 disp('Positions of window centers (actually were integers in the internally scaled image):');
-for i=1:length(win)
-fprintf('%5.1f   %5.1f\n',win(i).r,win(i).c);
+%     for i=1:length(win)
+%         fprintf('%5.1f   %5.1f\n',win(i).r,win(i).c);
+%     end
+figure, imshow(image);
+title('All the interest points');
+hold on
+for i = 1:length(win)
+plot(win(i).c,win(i).r,'b+');
+hold on
 end
 
-%% Reducing the number of interest points
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%:
+
+% Reducing the number of interest points
 winMatrix = [];
 winMatrix(1,:) = [win.r];
 winMatrix(2,:) = [win.c];
 winMatrix = winMatrix';
 dummy = winMatrix;
-for i=1:size(dummy,1)
-if (i==size(dummy,1))
+%     [Y,I]=sort(dummy(:,1));
+%     dummy = dummy(I,:); %use the column indices from sort() to sort all columns of A.
+for i=1:length(dummy)
+if (i==length(dummy))
 break
 else
-extra = [];
-extra(1,:) = dummy(i+1:size(dummy,1),1) - dummy(i,1);
-extra(2,:) = dummy(i+1:size(dummy,1),2) - dummy(i,2);
-extra = extra';
-redCond = (abs(extra(:,1))<8) & (abs(extra(:,2))<8);
-dummy(redCond,:) = [];
+boundaryArr(1,:) = [dummy(i,1)-10 dummy(i,2)-10];
+boundaryArr(2,:) = [dummy(i,1)-10 dummy(i,2)+10];
+boundaryArr(3,:) = [dummy(i,1)+10 dummy(i,2)+10];
+boundaryArr(4,:) = [dummy(i,1)+10 dummy(i,2)-10];
+[in,on] = inpolygon(dummy(i+1:length(dummy),1),dummy(i+1:length(dummy),2),boundaryArr(:,1)',boundaryArr(:,2)');
+plot(boundaryArr(:,2)',boundaryArr(:,1)','r');
+hold on;
+xq = dummy(i+1:length(dummy),1);
+yq = dummy(i+1:length(dummy),2);
+xq;
+yq(in);
+% Removal of interest points with values within +3 and -3 of
+% current interest point
+%     extra = [];
+%     extra(:,1) = abs(dummy(i+1:length(dummy),1) - dummy(i,1)); % r of win
+%     extra(:,2) = abs(dummy(i+1:length(dummy),1) - dummy(i,2)); % c of win
+%     redCond = (extra(:,1)<=4) & (extra(:,2)<=8);
+%     dummy(redCond,:) = [];
 end
+%     end
+%     win = dummy;
+%     % Display the selected interest points on the image
+%     figure, imshow(image);
+%     title('Reduced interest points');
+%     hold on
+%     for i = 1:length(win)
+%         plot(win(i,2),win(i,1),'r+');
+%
+%end
 end
-win = dummy;
-%% STEP 2:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%:
 
 % Take image patches around the interest points and store them in a
 % cell array
 % Calculate the number of interest points that have been detected
-interestPoints = size(win,1);
+interestPoints = size(win,2);
 % Decide the size of patches
 windowSize = 37;
 halfLength = (windowSize-1)/2;
@@ -77,8 +110,8 @@ window = zeros(windowSize, windowSize);
 extendedImage = padarray(image,[halfLength,halfLength],'both');
 % For each location of the interest point, take the window centered at it
 for numberOfPoints = 1:interestPoints
-x = floor(win(numberOfPoints,1));
-y = floor(win(numberOfPoints,2));
+x = floor(win(numberOfPoints).r);
+y = floor(win(numberOfPoints).c);
 for i = 1:windowSize
 for j = 1:windowSize
 window(i,j) = extendedImage(x+i-1, y+j-1);
@@ -88,5 +121,14 @@ patches{k} = window;
 k = k + 1;
 end
 
-%figure,imshow(mat2gray(patches{k}));
-% without reducing the number of interest points we get 3000 patches for each image 
+%     for k = 1:1:10
+%         figure,imshow(mat2gray(patches{k}))
+%     end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%:
+
+% Converting all patches into vectors and storing them all in a matrix
+for i=1:650
+patchMatrix(length(patchMatrix)+1,:) = reshape(patches{i,1}, 1, windowSize*windowSize); %Patch made column wise
+end
+end
