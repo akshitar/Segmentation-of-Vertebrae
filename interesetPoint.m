@@ -5,9 +5,7 @@ boundaryArr = [];
 
 allImages = dir('*.png');  % the folder in which ur images exists
 % Decaler a cell array to store the patches
-n = 128;
-patches = cell(n, 1);
-k = 1;
+n = 3000;
 for i = 1 : length(allImages)
 filename = strcat('images/',allImages(i).name);
 % read the current image
@@ -53,8 +51,8 @@ winMatrix(1,:) = [win.r];
 winMatrix(2,:) = [win.c];
 winMatrix = winMatrix';
 dummy = winMatrix;
-dummy(:,3) = zeros([length(winMatrix),1])
-diff = 25;
+dummy(:,3) = zeros([length(winMatrix),1]);
+diff = 15;
 for i=1:length(dummy)
 if (i==length(dummy))
 break
@@ -96,6 +94,8 @@ end
 interestPoints = size(win,1);
 
 % Decide the size of patches
+k = 1;
+patches = {};
 windowSize = 37;
 halfLength = (windowSize-1)/2;
 window = zeros(windowSize, windowSize);
@@ -116,14 +116,21 @@ patches{k} = window;
 k = k + 1;
 end
 
-for k = 1:1:10
-figure,imshow(mat2gray(patches{k}))
-end
+%     for k = 1:1:10
+%         figure,imshow(mat2gray(patches{k}))
+%     end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%:
 
 % Converting all patches into vectors and storing them all in a matrix
 for i=1:length(win)
-patchMatrix((size(patchMatrix,1)+1),:) = reshape(patches{i,1}, 1, windowSize*windowSize); %Patch made column wise
+c = (size(patchMatrix,1));
+patchMatrix(c+1,:) = reshape(patches{1,i}, 1, windowSize*windowSize); %Patch made column wise
 end
+
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 5 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Perform Clustering on the patches collected so far
+train_pos_clusters = agglomerativeCluster( patchMatrix, 15 );
+show_clusters( train_pos_clusters, patchMatrix )
