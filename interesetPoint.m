@@ -100,22 +100,30 @@ windowSize = 37;
 halfLength = (windowSize-1)/2;
 window = zeros(windowSize, windowSize);
 
-% Extend the image
-extendedImage = padarray(image,[halfLength,halfLength],'both');
+% % Extend the image
+% extendedImage = padarray(image,[halfLength,halfLength],'both');
+borderColumns = size(image,1)-halfLength;
+borderRows = size(image,2)-halfLength;
 
 % For each location of the interest point, take the window centered at it
 for numberOfPoints = 1:interestPoints
 x = floor(win(numberOfPoints,1));
 y = floor(win(numberOfPoints,2));
-for i = 1:windowSize
-for j = 1:windowSize
-window(i,j) = extendedImage(x+i-1, y+j-1);
-end
-end
+%     disp(x);
+%     disp(y);
+if ( (x > halfLength) & (x < borderColumns) )
+if ( (y > halfLength) & (y < borderRows) )
+numberOfPoints
+window = image(x-halfLength:x+halfLength, y-halfLength:y+halfLength);
 patches{k} = window;
 k = k + 1;
+else
+sprintf('Patch is out of bounds for %d , %d', x , y)
 end
-
+else
+sprintf('Patch is out of bounds for %d , %d', x , y)
+end
+end
 %     for k = 1:1:10
 %         figure,imshow(mat2gray(patches{k}))
 %     end
@@ -123,7 +131,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%:
 
 % Converting all patches into vectors and storing them all in a matrix
-for i=1:length(win)
+for i=1:length(patches)
 c = (size(patchMatrix,1));
 patchMatrix(c+1,:) = reshape(patches{1,i}, 1, windowSize*windowSize); %Patch made column wise
 end
@@ -132,5 +140,5 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 5 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Perform Clustering on the patches collected so far
-train_pos_clusters = agglomerativeCluster( patchMatrix, 15 );
+train_pos_clusters = agglomerativeCluster( patchMatrix, 26 );
 show_clusters( train_pos_clusters, patchMatrix )
