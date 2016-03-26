@@ -1,4 +1,4 @@
-% ngc - normalized greyscale correlation
+% ngc - normalized grayscale correlation
 % params:
 % p1,2 - two patches to be correlated
 % return:
