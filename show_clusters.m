@@ -24,7 +24,6 @@ samples_per_cluster = 10;
 scrsz = get(0,'ScreenSize');
 
 for i=0:clusters_at_once:num_clusters
-  close all
   %figure('Position', [1 scrsz(4)/2 scrsz(3)/2 scrsz(4)/2]);
   figure('Position', [1 scrsz(4)/2 scrsz(3) scrsz(4)/2]);
   for j=1:clusters_at_once
