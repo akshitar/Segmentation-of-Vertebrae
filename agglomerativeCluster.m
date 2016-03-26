@@ -7,7 +7,6 @@
 % returns:
 % clusters - cell array of patch indices, representing the clusters
 function clusters = agglomerativeCluster( patches, threshold )
-
 clusters = {};
 
 % initialize each patch as its own cluster
@@ -57,4 +56,3 @@ result = sprintf('converged to %d clusters', count)
 % merge two vectors (ie 1-d matrices)
 function result = merge( a, b )
   result = [a b];
-
