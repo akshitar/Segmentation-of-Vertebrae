@@ -18,4 +18,3 @@ for i=1:n1
 end
 
 score = sum_cor / (n1*n2);
-
