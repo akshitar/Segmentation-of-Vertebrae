@@ -1,13 +1,14 @@
 close all, clear all, clc;
 patchMatrix = [];
 boundaryArr = [];
-%% STEP 1:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Take all the positive samples and detect interest points
 allImages = dir('*.png');  % the folder in which ur images exists
-% Decaler a cell array to store the patches
+% Declare a cell array to store the patches
 n = 3000;
-for i = 1 : length(allImages)
-filename = strcat('images/',allImages(i).name);
+for imageNumber = 1 : 5
+filename = strcat('images/',allImages(imageNumber).name);
 % read the current image
 image = imread(filename);
 dimensions = size(image);
@@ -43,7 +44,7 @@ plot(win(i).c,win(i).r,'b+');
 hold on
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Reducing the number of interest points
 winMatrix = [];
@@ -107,22 +108,22 @@ borderRows = size(image,2)-halfLength;
 
 % For each location of the interest point, take the window centered at it
 for numberOfPoints = 1:interestPoints
-x = floor(win(numberOfPoints,1));
-y = floor(win(numberOfPoints,2));
+    x = floor(win(numberOfPoints,1));
+    y = floor(win(numberOfPoints,2));
 %     disp(x);
 %     disp(y);
-if ( (x > halfLength) & (x < borderColumns) )
-if ( (y > halfLength) & (y < borderRows) )
-numberOfPoints
-window = image(x-halfLength:x+halfLength, y-halfLength:y+halfLength);
-patches{k} = window;
-k = k + 1;
-else
-sprintf('Patch is out of bounds for %d , %d', x , y)
-end
-else
-sprintf('Patch is out of bounds for %d , %d', x , y)
-end
+    if ( (x > halfLength) & (x < borderColumns) )
+        if ( (y > halfLength) & (y < borderRows) )
+            numberOfPoints
+            window = image(x-halfLength:x+halfLength, y-halfLength:y+halfLength); 
+            patches{k} = window;
+            k = k + 1;
+        else 
+            sprintf('Patch is out of bounds for %d , %d', x , y)
+        end
+    else 
+        sprintf('Patch is out of bounds for %d , %d', x , y)
+    end
 end
 %     for k = 1:1:10
 %         figure,imshow(mat2gray(patches{k}))
@@ -140,5 +141,15 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 5 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Perform Clustering on the patches collected so far
-train_pos_clusters = agglomerativeCluster( patchMatrix, 26 );
-show_clusters( train_pos_clusters, patchMatrix )
+train_pos_clusters = agglomerativeCluster( patchMatrix, 15 );
+% show_clusters( train_pos_clusters, patchMatrix )
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 6 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Store the cluster centroids in a matrix
+clusterSize = length(train_pos_clusters);
+for clusterNumber = 1:clusterSize
+    centroids(clusterNumber,:) = mean(patchMatrix(train_pos_clusters{1,clusterNumber},:),1);
+end
+
+
