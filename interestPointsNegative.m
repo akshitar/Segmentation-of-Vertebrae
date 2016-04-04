@@ -108,7 +108,6 @@ window = zeros(windowSize, windowSize);
 
 % For each location of the interest point, take the window centered at it
 for numberOfPoints = 1:interestPoints
-    numberOfPoints
     x = floor(winNeg(numberOfPoints,1));
     y = floor(winNeg(numberOfPoints,2));
     window = extendedImage(x-halfLength:x+halfLength, y-halfLength:y+halfLength); 
@@ -134,13 +133,27 @@ end
 load centroids.mat;
 load train_pos_clusters;
 numberOfPatches = size(patchMatrixNeg,1);
-%for currentPatch = 1:numberOfPatches
-currentPatch = 1;
-    repeatedMatrix = repmat(patchMatrixNeg(currentPatch,:),[257,1]);
-    distance = pdist2(centroids, repeatedMatrix, 'euclidean');
-%end
-
-
-
+numberOfCentroids = size(centroids,1);
+% Declare a cell aray to hold similar patch's indices together
+train_neg_clusters = cell(1,numberOfCentroids);
+for index = 1:numberOfCentroids
+    train_neg_clusters{1,index} = zeros(0,0);
+end
+% Calculate the euclidean distance between the patch from each of the
+% centroids
+currentMatrix = zeros(2,windowSize*windowSize);
+distance = zeros(numberOfCentroids,1);
+for currentPatch = 1:numberOfPatches
+    for currentCentroid = 1:numberOfCentroids
+    currentMatrix(1,:) = patchMatrixNeg(currentPatch,:);
+    currentMatrix(2,:) = centroids(currentCentroid,:);
+    distance(currentCentroid,1) = pdist(currentMatrix,'euclidean');
+    end
+    % Assign the patch to the cluster which is the nearest
+    [minimumDistance, nearestCentroid] = min(distance);
+    train_neg_clusters{nearestCentroid} = [train_neg_clusters{nearestCentroid} num2cell(currentPatch)];
+end
+% Display similar patches
+show_neg_clusters( train_neg_clusters, patchMatrixNeg )
 
 
